@@ -23,13 +23,18 @@ const App: FC = () => {
 
     const paginationRange = useMemo(() => rangeCreator(pagination.start, pagination.end, repos.total_count), [pagination, repos.total_count])
 
-    const onInputChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
+    const onInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setInputValue(p => ({
             ...p,
-            [evt.target.name]: evt.target.value
+            [event.target.name]: event.target.value
         }));
     }
 
+    const onSelect = (event: React.ChangeEvent<HTMLSelectElement>) => {
+        setLicense(event.target.value)
+        setPagination(INITIAL_PAGINATION);
+        setPage(1);
+    }
 
     useEffect(() => {
 
@@ -61,7 +66,6 @@ const App: FC = () => {
 
     }, [page, license, inputValue]);
 
-
   return (
     <main className="app">
         <div className="container">
@@ -73,15 +77,11 @@ const App: FC = () => {
                 <input name="projectName" value={inputValue.projectName} onChange={onInputChange} type="text" className="form-control app__input" />
             </div>
 
-            <select value={license} onChange={e => {
-                setLicense(e.target.value)
-                setPagination(INITIAL_PAGINATION);
-                setPage(1);
-            }} className="custom-select app__select mb-3">
+            <select value={license} onChange={onSelect} className="custom-select app__select mb-3">
                 {licenses.map(({ name, key, node_id }) => <option key={node_id} value={key}>{name}</option>)}
             </select>
 
-            {error ?<div className="alert alert-danger" role="alert">
+            {error ? <div className="alert alert-danger" role="alert">
                 {error}
             </div> : null}
 
@@ -90,15 +90,15 @@ const App: FC = () => {
                     <span className="sr-only">Loading...</span>
                 </div> : null}
 
-                {repos.items.length ? (
-                    <ul className="list-group mb-3 app__items">
-                        {repos.items.map(repo => <li className="list-group-item" key={repo.git_url}>{repo.name}</li>)}
-                    </ul>
-                ) : (
+                <ul className="list-group mb-3 app__items">
+                    {repos.items.map(repo => <li className="list-group-item" key={repo.git_url}>{repo.name}</li>)}
+                </ul>
+
+                {!repos.items.length && !error ? (
                     <div className="alert alert-secondary" role="alert">
                         Everything is ok! We just dont have any data to show!
                     </div>
-                )}
+                ) : null}
             </div>
 
             <nav className="app__pagination">
