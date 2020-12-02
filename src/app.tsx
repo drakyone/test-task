@@ -5,7 +5,7 @@ import {
     INITIAL_LICENSE,
     INITIAL_LICENSES,
     INITIAL_PAGINATION,
-    INITIAL_REPOS,
+    INITIAL_REPOS, PAGE_STEP,
     STEP
 } from "./constants";
 import {rangeCreator} from "./helpers";
@@ -23,17 +23,22 @@ const App: FC = () => {
 
     const paginationRange = useMemo(() => rangeCreator(pagination.start, pagination.end, repos.total_count), [pagination, repos.total_count])
 
+    const resetPage = () => {
+        setPagination(INITIAL_PAGINATION);
+        setPage(1);
+    }
+
     const onInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setInputValue(p => ({
             ...p,
             [event.target.name]: event.target.value
         }));
+        resetPage();
     }
 
     const onSelect = (event: React.ChangeEvent<HTMLSelectElement>) => {
         setLicense(event.target.value)
-        setPagination(INITIAL_PAGINATION);
-        setPage(1);
+        resetPage();
     }
 
     useEffect(() => {
@@ -119,13 +124,13 @@ const App: FC = () => {
                     {paginationRange.map(p =>
                         <li
                             key={p}
-                            className={`page-item ${ p === page ? "active" : "" } `}
+                            className={`page-item pagination__item ${ p === page ? "active" : "" } `}
                             onClick={() => setPage(p)}
                         >
                             <p className="page-link">{p}</p>
                         </li>)}
 
-                    <li className={`page-item ${ (pagination.end * 5) > repos.total_count ? "disabled" : "" }`}>
+                    <li className={`page-item pagination__item ${ (pagination.end * PAGE_STEP) >= repos.total_count ? "disabled" : "" }`}>
                         <button
                             className="page-link"
                             onClick={() => {

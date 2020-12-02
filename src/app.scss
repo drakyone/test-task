@@ -10,4 +10,10 @@
     left: 50%;
     z-index: 1;
   }
+
+  .pagination {
+    &__item {
+      cursor: pointer;
+    }
+  }
 }
