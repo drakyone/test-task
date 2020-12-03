@@ -5,11 +5,18 @@ import {
     INITIAL_LICENSE,
     INITIAL_LICENSES,
     INITIAL_PAGINATION,
-    INITIAL_REPOS, PAGE_STEP,
+    INITIAL_REPOS,
     STEP
 } from "./constants";
 import {rangeCreator} from "./helpers";
 import "./app.scss";
+import {PaginationType} from "./enums";
+import {Alert} from "./components/alert";
+import {Pagination} from "./components/pagination";
+import {ReposList} from "./components/repos-list";
+import {Error} from "./components/error";
+import {SelectLicense} from "./components/select-license";
+import {ProjectInput} from "./components/project-input";
 
 const App: FC = () => {
     const [repos, setRepos] = useState(INITIAL_REPOS);
@@ -39,6 +46,17 @@ const App: FC = () => {
     const onSelect = (event: React.ChangeEvent<HTMLSelectElement>) => {
         setLicense(event.target.value)
         resetPage();
+    }
+
+    const onPaginationClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+        const target = event.target as any;
+        const { name } = target;
+        const isDecrease: Boolean = PaginationType.Decrease === name
+        setPagination(p => ({
+            start: isDecrease ? p.start - STEP : p.start + STEP,
+            end: isDecrease ? p.end - STEP : p.end + STEP
+        }))
+        setPage(isDecrease ? pagination.end - STEP : pagination.start + STEP) ;
     }
 
     useEffect(() => {
@@ -74,77 +92,19 @@ const App: FC = () => {
   return (
     <main className="app">
         <div className="container">
-
-            <div className="input-group mb-3 mt-3">
-                <div className="input-group-prepend">
-                    <span className="input-group-text">Project name</span>
-                </div>
-                <input name="projectName" value={inputValue.projectName} onChange={onInputChange} type="text" className="form-control app__input" />
-            </div>
-
-            <select value={license} onChange={onSelect} className="custom-select app__select mb-3">
-                {licenses.map(({ name, key, node_id }) => <option key={node_id} value={key}>{name}</option>)}
-            </select>
-
-            {error ? <div className="alert alert-danger" role="alert">
-                {error}
-            </div> : null}
-
-            <div className="app__list">
-                {isLoading ? <div className="spinner-border text-primary app__preloader" role="status">
-                    <span className="sr-only">Loading...</span>
-                </div> : null}
-
-                <ul className="list-group mb-3 app__items">
-                    {repos.items.map(repo => <li className="list-group-item" key={repo.git_url}>{repo.name}</li>)}
-                </ul>
-
-                {!repos.items.length && !error ? (
-                    <div className="alert alert-secondary" role="alert">
-                        Everything is ok! We just dont have any data to show!
-                    </div>
-                ) : null}
-            </div>
-
-            <nav className="app__pagination">
-                <ul className="pagination justify-content-end">
-
-                    <li className={`page-item ${ pagination.start === 1 ? "disabled" : "" }`}>
-                        <button
-                            className="page-link"
-                            onClick={() => {
-                                setPagination(p => ({ start: p.start - STEP, end: p.end - STEP }))
-                                setPage(pagination.end - STEP);
-                            }}
-                        >
-                            Previous
-                        </button>
-                    </li>
-
-                    {paginationRange.map(p =>
-                        <li
-                            key={p}
-                            className={`page-item pagination__item ${ p === page ? "active" : "" } `}
-                            onClick={() => setPage(p)}
-                        >
-                            <p className="page-link">{p}</p>
-                        </li>)}
-
-                    <li className={`page-item pagination__item ${ (pagination.end * PAGE_STEP) >= repos.total_count ? "disabled" : "" }`}>
-                        <button
-                            className="page-link"
-                            onClick={() => {
-                                setPagination(p => ({ start: p.start + STEP, end: p.end + STEP }))
-                                setPage(pagination.start + STEP);
-                            }}
-                        >
-                            Next
-                        </button>
-                    </li>
-
-                </ul>
-            </nav>
-
+            <ProjectInput value={inputValue.projectName} onChange={onInputChange} />
+            <SelectLicense licenses={licenses} value={license} onChange={onSelect} />
+            <Error error={error} />
+            <ReposList repos={repos.items} isLoading={isLoading} />
+            <Alert isReposExist={Boolean(repos.items.length)} isErrorExist={Boolean(error)}> Everything is ok! We just dont have any data to show! </Alert>
+            <Pagination
+                onPaginationClick={onPaginationClick}
+                onPageClick={setPage}
+                pagination={pagination}
+                totalRepos={repos.total_count}
+                paginationRange={paginationRange}
+                page={page}
+            />
         </div>
     </main>
   );
