@@ -5,7 +5,7 @@ import {PaginationType} from "../../enums";
 import {PAGE_STEP} from "../../constants";
 import {PaginationItem} from "./pagination-item";
 
-export const Pagination: FC<PaginationProps> = ({ onPaginationClick, onPageClick, paginationRange, pagination, totalRepos = 0, page }) => (
+export const Pagination: FC<PaginationProps> = ({ onPaginationClick, onPageClick, paginationRange, pagination, total = 0, page }) => (
     <nav className="app__pagination">
         <ul className="pagination justify-content-end">
 
@@ -24,7 +24,7 @@ export const Pagination: FC<PaginationProps> = ({ onPaginationClick, onPageClick
                 name={PaginationType.Increase}
                 onClick={onPaginationClick}
                 pagination={pagination}
-                totalRepos={totalRepos}
+                total={total}
                 pageStep={PAGE_STEP}
             >
                 Next

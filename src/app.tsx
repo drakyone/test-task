@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState, useMemo } from 'react';
+import React, {FC, useEffect, useMemo, useState} from 'react';
 import {getLicenses, getTopJsRepos} from './axios';
 import {
     INITIAL_INPUT_VALUE,
@@ -13,20 +13,21 @@ import "./app.scss";
 import {PaginationType} from "./enums";
 import {Alert} from "./components/alert";
 import {Pagination} from "./components/pagination";
-import {ReposList} from "./components/repos-list";
+import {List} from "./components/list";
 import {Error} from "./components/error";
-import {SelectLicense} from "./components/select-license";
-import {ProjectInput} from "./components/project-input";
+import {Select} from "./components/select";
+import {Input} from "./components/input";
+import {InputValue, License, PaginationInterface, Repos} from "./interfaces";
 
 const App: FC = () => {
-    const [repos, setRepos] = useState(INITIAL_REPOS);
-    const [licenses, setLicenses] = useState(INITIAL_LICENSES);
-    const [license, setLicense] = useState(INITIAL_LICENSE);
-    const [error, setError] = useState('');
-    const [isLoading, setLoading] = useState(false);
-    const [pagination, setPagination] = useState(INITIAL_PAGINATION);
-    const [page, setPage] = useState(1);
-    const [inputValue, setInputValue] = useState(INITIAL_INPUT_VALUE);
+    const [repos, setRepos] = useState<Repos>(INITIAL_REPOS);
+    const [licenses, setLicenses] = useState<License[]>(INITIAL_LICENSES);
+    const [license, setLicense] = useState<string>(INITIAL_LICENSE);
+    const [error, setError] = useState<string>('');
+    const [isLoading, setLoading] = useState<boolean>(false);
+    const [pagination, setPagination] = useState<PaginationInterface>(INITIAL_PAGINATION);
+    const [page, setPage] = useState<number>(1);
+    const [inputValue, setInputValue] = useState<InputValue>(INITIAL_INPUT_VALUE);
 
     const paginationRange = useMemo(() => rangeCreator(pagination.start, pagination.end, repos.total_count), [pagination, repos.total_count])
 
@@ -50,64 +51,67 @@ const App: FC = () => {
 
     const onPaginationClick = (event: React.MouseEvent<HTMLButtonElement>) => {
         const target = event.target as any;
-        const { name } = target;
+        const {name} = target;
         const isDecrease: Boolean = PaginationType.Decrease === name
         setPagination(p => ({
             start: isDecrease ? p.start - STEP : p.start + STEP,
             end: isDecrease ? p.end - STEP : p.end + STEP
         }))
-        setPage(isDecrease ? pagination.end - STEP : pagination.start + STEP) ;
+        setPage(isDecrease ? pagination.end - STEP : pagination.start + STEP);
     }
 
     useEffect(() => {
 
         (async () => {
-            const { message, data } = await getLicenses();
-            if(data) {
+            const {message, data} = await getLicenses();
+            if (data) {
                 setLicenses(data)
                 error && setError('');
-            }
-            else setError(message)
+            } else setError(message)
         })()
 
     }, []);
 
     useEffect(() => {
 
-        const { projectName } = inputValue;
+        const {projectName} = inputValue;
 
         (async () => {
             setLoading(true);
-            const { message, data } = await getTopJsRepos(page, license, projectName);
-            if(data) {
+            const {message, data} = await getTopJsRepos(page, license, projectName);
+            if (data) {
                 setRepos(data)
                 error && setError('');
-            }
-            else setError(message)
+            } else setError(message)
             setLoading(false);
         })()
 
     }, [page, license, inputValue]);
 
-  return (
-    <main className="app">
-        <div className="container">
-            <ProjectInput value={inputValue.projectName} onChange={onInputChange} />
-            <SelectLicense licenses={licenses} value={license} onChange={onSelect} />
-            <Error error={error} />
-            <ReposList repos={repos.items} isLoading={isLoading} />
-            <Alert isReposExist={Boolean(repos.items.length)} isErrorExist={Boolean(error)}> Everything is ok! We just dont have any data to show! </Alert>
-            <Pagination
-                onPaginationClick={onPaginationClick}
-                onPageClick={setPage}
-                pagination={pagination}
-                totalRepos={repos.total_count}
-                paginationRange={paginationRange}
-                page={page}
-            />
-        </div>
-    </main>
-  );
+    return (
+        <main className="app">
+            <div className="container">
+                <Input value={inputValue.projectName} onChange={onInputChange} name="Project Name"/>
+                <Select licenses={licenses} value={license} onChange={onSelect}/>
+                <Error error={error}/>
+                <List list={repos.items} isLoading={isLoading}/>
+                {!repos.items.length && !error ? (
+                    <Alert>
+                        Everything is ok! We
+                        just dont have any data to show!
+                    </Alert>
+                ) : null}
+                <Pagination
+                    onPaginationClick={onPaginationClick}
+                    onPageClick={setPage}
+                    pagination={pagination}
+                    total={repos.total_count}
+                    paginationRange={paginationRange}
+                    page={page}
+                />
+            </div>
+        </main>
+    );
 }
 
 export default App;

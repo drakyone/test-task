@@ -1,4 +1,4 @@
-import {InputValue, License, Pagination, Repos} from "./interfaces";
+import {InputValue, License, PaginationInterface, Repos} from "./interfaces";
 import moment from "moment";
 
 export const INITIAL_REPOS: Repos = {
@@ -10,7 +10,7 @@ export const INITIAL_LICENSES: License[] = [];
 
 export const INITIAL_LICENSE: string = 'mit';
 
-export const INITIAL_PAGINATION: Pagination = {
+export const INITIAL_PAGINATION: PaginationInterface = {
     start: 1,
     end: 3,
 };

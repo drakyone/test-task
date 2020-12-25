@@ -1,6 +1,6 @@
 import {License} from "../../interfaces";
 
-export interface SelectLicenseProps {
+export interface SelectProps {
   licenses: License[];
   value: string;
   onChange: (event: React.ChangeEvent<HTMLSelectElement>) => void;

@@ -3,7 +3,7 @@ export interface Repos {
     total_count: number,
 }
 
-export interface Pagination {
+export interface PaginationInterface {
     start: number;
     end: number;
 }
