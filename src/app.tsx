@@ -92,8 +92,10 @@ const App: FC = () => {
         <main className="app">
             <div className="container">
                 <Input value={inputValue.projectName} onChange={onInputChange} name="Project Name"/>
-                <Select licenses={licenses} value={license} onChange={onSelect}/>
-                <Error error={error}/>
+                <Select options={licenses} value={license} onChange={onSelect}/>
+                {error ? (
+                    <Error error={error}/>
+                ) : null}
                 <List list={repos.items} isLoading={isLoading}/>
                 {!repos.items.length && !error ? (
                     <Alert>
